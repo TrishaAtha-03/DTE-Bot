@@ -329,7 +329,7 @@ export default function ChatPage() {
         padding:'8px',background:'white',
         borderTop:'1px solid var(--gray-100)'
       }}>
-        Department of Technical Education, Government of Rajasthan · VidyaSaarthi AI Assistant
+        Department of Technical Education, Government of Rajasthan · Edubot AI Assistant
       </div>
 
       <style>{`

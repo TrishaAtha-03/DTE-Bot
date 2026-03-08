@@ -63,7 +63,13 @@ DTE Rajasthan Team
             s.sendmail(msg['From'], [to_email], msg.as_string())
     except Exception as e:
         print(f"Email error: {e}")
-        raise e
+
+def send_reset_email_async(to_email: str, token: str):
+    """Run send_reset_email in a background thread."""
+    import threading
+    thread = threading.Thread(target=send_reset_email, args=(to_email, token))
+    thread.daemon = True
+    thread.start()
 
 
 # ============================================================
@@ -151,24 +157,25 @@ def forgot_password():
 
     user = execute_one(
         "SELECT u.*, c.email as college_email FROM UserAccount u "
-        "LEFT JOIN College c ON u.college_id = c.id WHERE u.username = %s",
+        "LEFT JOIN College c ON u.college_id = c.id WHERE u.username = %s AND u.is_active = 1",
         (username,)
     )
     # Always return success to prevent user enumeration
     if user:
         token = secrets.token_urlsafe(32)
         expires = datetime.utcnow() + timedelta(hours=1)
+        # Hash the reset token before storing it
+        import hashlib
+        hashed_token = hashlib.sha256(token.encode()).hexdigest()
+        
         execute_one(
             "UPDATE UserAccount SET reset_token = %s, reset_token_expires = %s WHERE id = %s",
-            (token, expires, user['id']),
+            (hashed_token, expires, user['id']),
             commit=True
         )
         # Send email to college email
         if user.get('college_email'):
-            try:
-                send_reset_email(user['college_email'], token)
-            except Exception:
-                pass
+            send_reset_email_async(user['college_email'], token)
 
     return jsonify({"message": "If the account exists, a reset link has been sent to the registered college email."}), 200
 
@@ -186,9 +193,12 @@ def reset_password():
     if len(new_password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
 
+    import hashlib
+    hashed_token = hashlib.sha256(token.encode()).hexdigest()
+
     user = execute_one(
         "SELECT * FROM UserAccount WHERE reset_token = %s AND reset_token_expires > %s",
-        (token, datetime.utcnow())
+        (hashed_token, datetime.utcnow())
     )
     if not user:
         return jsonify({"error": "Invalid or expired reset token"}), 400
@@ -279,10 +289,13 @@ def create_course():
     user_id = get_jwt_identity()
     user = execute_one("SELECT college_id FROM UserAccount WHERE id = %s", (user_id,))
     data = request.json
-    course_id = execute_one(
-        "INSERT INTO Course (college_id, name, branch, duration_years, intake_capacity) VALUES (%s,%s,%s,%s,%s)",
+    # Use execute_query with fetch=False so we correctly return the new course ID.
+    course_id = execute_query(
+        "INSERT INTO Course (college_id, name, branch, duration_years, intake_capacity) "
+        "VALUES (%s,%s,%s,%s,%s)",
         (user['college_id'], data.get('name'), data.get('branch'),
          data.get('duration_years'), data.get('intake_capacity')),
+        fetch=False,
         commit=True
     )
     return jsonify({"id": course_id, "message": "Course created"}), 201
@@ -559,14 +572,24 @@ def chat():
 
     if not user_message:
         return jsonify({"error": "Message is required"}), 400
+        
+    if len(user_message) > 500:
+        return jsonify({"error": "Message is too long (max 500 characters)"}), 400
 
-    if not session_id:
+    if not session_id or len(session_id) != 36:
+        # Generate generic new session if missing or not a UUID
         session_id = str(uuid.uuid4())
 
     # Ensure session exists
     existing_session = execute_one("SELECT session_id FROM ChatSession WHERE session_id = %s", (session_id,))
     if not existing_session:
-        execute_one("INSERT INTO ChatSession (session_id) VALUES (%s)", (session_id,), commit=True)
+        # If it's a new 36 char UUID from a client, insert it, otherwise generate a fresh one
+        try:
+            uuid.UUID(session_id)
+            execute_one("INSERT INTO ChatSession (session_id) VALUES (%s)", (session_id,), commit=True)
+        except ValueError:
+            session_id = str(uuid.uuid4())
+            execute_one("INSERT INTO ChatSession (session_id) VALUES (%s)", (session_id,), commit=True)
 
     # Fetch last 10 messages for context
     history = execute_query(
@@ -595,6 +618,11 @@ def chat():
 
 @app.route("/api/chat/history/<session_id>", methods=["GET"])
 def get_chat_history(session_id):
+    try:
+        uuid.UUID(session_id)
+    except ValueError:
+        return jsonify({"error": "Invalid session ID format"}), 400
+        
     history = execute_query(
         "SELECT role, content, created_at FROM ChatMessage WHERE session_id = %s ORDER BY created_at ASC",
         (session_id,)

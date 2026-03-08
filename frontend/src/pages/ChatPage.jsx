@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Send, Bot, User, LogIn, Mic, RotateCcw } from 'lucide-react'
+import { Send, Bot, User, LogIn, Mic, RotateCcw, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
 // import styles from './ChatPage.module.css'
@@ -17,23 +17,23 @@ I can help you with:
 - 📅 Admission schedules & important dates
 - 🔬 Available courses & branches
 
-What would you like to know today?`
+To get started, please tell me the name of the college you are interested in?`
 }
 
 const SUGGESTED = [
-  "What are the top engineering colleges in Rajasthan?",
+  "Government Engineering College, Ajmer",
+  "Government Polytechnic College, Jaipur",
   "Show me cutoff ranks for CSE branch",
   "What is the fee structure for B.Tech?",
-  "When does admission start for 2024-25?",
 ]
 
 function TypingIndicator() {
   return (
-    <div style={{display:'flex',gap:5,alignItems:'center',padding:'12px 16px'}}>
-      {[0,1,2].map(i => (
+    <div style={{ display: 'flex', gap: 5, alignItems: 'center', padding: '12px 16px' }}>
+      {[0, 1, 2].map(i => (
         <span key={i} style={{
-          width:8,height:8,borderRadius:'50%',background:'#FF6B00',display:'block',
-          animation:`typingDot 1.2s ease ${i*0.2}s infinite`
+          width: 8, height: 8, borderRadius: '50%', background: '#FF6B00', display: 'block',
+          animation: `typingDot 1.2s ease ${i * 0.2}s infinite`
         }} />
       ))}
     </div>
@@ -57,28 +57,28 @@ function MessageBubble({ msg }) {
 
   return (
     <div style={{
-      display:'flex',gap:10,alignItems:'flex-start',
+      display: 'flex', gap: 10, alignItems: 'flex-start',
       flexDirection: isUser ? 'row-reverse' : 'row',
       animation: 'fadeIn 0.3s ease',
-      marginBottom:16,
+      marginBottom: 16,
     }}>
       <div style={{
-        width:36,height:36,borderRadius:'50%',flexShrink:0,
+        width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
         background: isUser ? 'linear-gradient(135deg,#1A3A6B,#2A5298)' : 'linear-gradient(135deg,#FF6B00,#FF8C33)',
-        display:'flex',alignItems:'center',justifyContent:'center',
-        boxShadow:'0 2px 8px rgba(0,0,0,0.15)'
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
       }}>
         {isUser ? <User size={18} color="white" /> : <Bot size={18} color="white" />}
       </div>
-      <div style={{
-        maxWidth:'75%',
+      <div className="message-bubble-container" style={{
+        maxWidth: '75%',
         background: isUser ? 'linear-gradient(135deg,#1A3A6B,#2A5298)' : 'white',
         color: isUser ? 'white' : '#1F2937',
-        padding:'12px 16px',
+        padding: '12px 16px',
         borderRadius: isUser ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
-        boxShadow:'0 2px 8px rgba(0,0,0,0.08)',
-        fontSize:14,lineHeight:1.65,
-        whiteSpace:'pre-wrap',wordBreak:'break-word'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        fontSize: 14, lineHeight: 1.65,
+        whiteSpace: 'pre-wrap', wordBreak: 'break-word'
       }}>
         {text.split('\n').map((line, i) => (
           <React.Fragment key={i}>
@@ -132,114 +132,117 @@ export default function ChatPage() {
   }
 
   return (
-    <div style={{display:'flex',flexDirection:'column',height:'100vh',background:'var(--off-white)'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--off-white)' }}>
       {/* Header */}
       <header style={{
-        background:'white',
-        borderBottom:'1px solid var(--gray-200)',
-        padding:'0 20px',
-        height:64,
-        display:'flex',alignItems:'center',justifyContent:'space-between',
-        flexShrink:0,
-        boxShadow:'0 1px 3px rgba(0,0,0,0.06)'
+        background: 'white',
+        borderBottom: '1px solid var(--gray-200)',
+        padding: '0 20px',
+        height: 64,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexShrink: 0,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
       }}>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Logo/Emblem */}
           <div style={{
-            width:44,height:44,borderRadius:'50%',
-            background:'linear-gradient(135deg,#FF6B00 0%,#FF8C33 50%,#1A3A6B 100%)',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            boxShadow:'0 2px 8px rgba(255,107,0,0.3)'
+            width: 44, height: 44, borderRadius: '50%',
+            background: 'linear-gradient(135deg,#FF6B00 0%,#FF8C33 50%,#1A3A6B 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(255,107,0,0.3)'
           }}>
             <Bot size={22} color="white" />
           </div>
           <div>
-            <div style={{fontWeight:700,fontSize:16,color:'var(--royal-blue)',fontFamily:'var(--font-display)'}}>
+            <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--royal-blue)', fontFamily: 'var(--font-display)' }}>
               EduBot
             </div>
-            <div style={{fontSize:11,color:'var(--gray-500)',marginTop:-2}}>
+            <div className="hide-on-mobile" style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: -2 }}>
               DTE Rajasthan · AI Assistant
             </div>
           </div>
           {/* India flag stripe decoration */}
-          <div style={{display:'flex',gap:2,marginLeft:8}}>
-            {['#FF6B00','#FFFFFF','#138808'].map((c,i) => (
-              <div key={i} style={{width:3,height:24,background:c,borderRadius:2,opacity:0.7}} />
+          <div style={{ display: 'flex', gap: 2, marginLeft: 8 }}>
+            {['#FF6B00', '#FFFFFF', '#138808'].map((c, i) => (
+              <div key={i} style={{ width: 3, height: 24, background: c, borderRadius: 2, opacity: 0.7 }} />
             ))}
           </div>
         </div>
 
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button
             onClick={handleReset}
             title="New conversation"
             style={{
-              display:'flex',alignItems:'center',gap:6,
-              padding:'7px 12px',borderRadius:8,
-              background:'var(--gray-100)',color:'var(--gray-600)',
-              fontSize:13,fontWeight:500,transition:'var(--transition)'
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 12px', borderRadius: 8,
+              background: 'var(--gray-100)', color: 'var(--gray-600)',
+              fontSize: 13, fontWeight: 500, transition: 'var(--transition)'
             }}
-            onMouseEnter={e=>e.currentTarget.style.background='var(--gray-200)'}
-            onMouseLeave={e=>e.currentTarget.style.background='var(--gray-100)'}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-200)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--gray-100)'}
           >
-            <RotateCcw size={14} /> New Chat
+            <RotateCcw size={14} /> <span className="hide-on-mobile">New Chat</span>
           </button>
 
           {user ? (
-            <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button
                 onClick={() => navigate('/admin/dashboard')}
                 style={{
-                  padding:'7px 14px',borderRadius:8,
-                  background:'var(--royal-blue)',color:'white',
-                  fontSize:13,fontWeight:600,transition:'var(--transition)'
+                  padding: '7px 14px', borderRadius: 8,
+                  background: 'var(--royal-blue)', color: 'white',
+                  fontSize: 13, fontWeight: 600, transition: 'var(--transition)'
                 }}
               >Dashboard</button>
               <button
                 onClick={logout}
                 style={{
-                  padding:'7px 14px',borderRadius:8,
-                  background:'var(--gray-100)',color:'var(--gray-600)',
-                  fontSize:13,fontWeight:500
+                  padding: '7px 14px', borderRadius: 8,
+                  background: 'var(--gray-100)', color: 'var(--gray-600)',
+                  fontSize: 13, fontWeight: 500
                 }}
-              >Logout</button>
+              >
+                <span className="hide-on-mobile">Logout</span> <LogOut className="hide-on-desktop" size={15} />
+              </button>
             </div>
           ) : (
             <button
               onClick={() => navigate('/admin/signin')}
               style={{
-                display:'flex',alignItems:'center',gap:8,
-                padding:'8px 18px',borderRadius:8,
-                background:'linear-gradient(135deg,#FF6B00,#FF8C33)',
-                color:'white',fontSize:13,fontWeight:600,
-                boxShadow:'0 2px 8px rgba(255,107,0,0.3)',
-                transition:'var(--transition)'
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 18px', borderRadius: 8,
+                background: 'linear-gradient(135deg,#FF6B00,#FF8C33)',
+                color: 'white', fontSize: 13, fontWeight: 600,
+                boxShadow: '0 2px 8px rgba(255,107,0,0.3)',
+                transition: 'var(--transition)'
               }}
-              onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(255,107,0,0.4)'}
-              onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(255,107,0,0.3)'}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 12px rgba(255,107,0,0.4)'}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(255,107,0,0.3)'}
             >
-              <LogIn size={15} /> Admin Sign In
+              <LogIn size={15} /> <span className="hide-on-mobile">Admin Sign In</span>
             </button>
           )}
         </div>
-      </header>
+      </header >
 
       {/* Chat Area */}
-      <div style={{flex:1,overflow:'hidden',display:'flex',flexDirection:'column',maxWidth:860,width:'100%',margin:'0 auto',padding:'0 16px'}}>
-        <div style={{flex:1,overflowY:'auto',padding:'20px 0 10px'}}>
+      < div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: 860, width: '100%', margin: '0 auto', padding: '0 16px' }
+      }>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 0 10px' }}>
           {messages.map((msg, i) => <MessageBubble key={i} msg={msg} />)}
           {loading && (
-            <div style={{display:'flex',gap:10,alignItems:'flex-start',marginBottom:16}}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 16 }}>
               <div style={{
-                width:36,height:36,borderRadius:'50%',flexShrink:0,
-                background:'linear-gradient(135deg,#FF6B00,#FF8C33)',
-                display:'flex',alignItems:'center',justifyContent:'center',
+                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg,#FF6B00,#FF8C33)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Bot size={18} color="white" />
               </div>
               <div style={{
-                background:'white',borderRadius:'4px 18px 18px 18px',
-                boxShadow:'0 2px 8px rgba(0,0,0,0.08)',
+                background: 'white', borderRadius: '4px 18px 18px 18px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
               }}>
                 <TypingIndicator />
               </div>
@@ -249,50 +252,52 @@ export default function ChatPage() {
         </div>
 
         {/* Suggested Questions */}
-        {messages.length <= 1 && (
-          <div style={{
-            display:'flex',flexWrap:'wrap',gap:8,padding:'10px 0',
-            animation:'fadeIn 0.5s ease'
-          }}>
-            {SUGGESTED.map((q, i) => (
-              <button
-                key={i}
-                onClick={() => sendMessage(q)}
-                style={{
-                  padding:'8px 14px',borderRadius:20,
-                  border:'1.5px solid var(--gray-200)',
-                  background:'white',color:'var(--gray-700)',
-                  fontSize:12,fontWeight:500,cursor:'pointer',
-                  transition:'var(--transition)',whiteSpace:'nowrap'
-                }}
-                onMouseEnter={e=>{
-                  e.currentTarget.style.borderColor='#FF6B00'
-                  e.currentTarget.style.color='#FF6B00'
-                }}
-                onMouseLeave={e=>{
-                  e.currentTarget.style.borderColor='var(--gray-200)'
-                  e.currentTarget.style.color='var(--gray-700)'
-                }}
-              >{q}</button>
-            ))}
-          </div>
-        )}
+        {
+          messages.length <= 1 && (
+            <div style={{
+              display: 'flex', flexWrap: 'wrap', gap: 8, padding: '10px 0',
+              animation: 'fadeIn 0.5s ease'
+            }}>
+              {SUGGESTED.map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => sendMessage(q)}
+                  style={{
+                    padding: '8px 14px', borderRadius: 20,
+                    border: '1.5px solid var(--gray-200)',
+                    background: 'white', color: 'var(--gray-700)',
+                    fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                    transition: 'var(--transition)', whiteSpace: 'nowrap'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = '#FF6B00'
+                    e.currentTarget.style.color = '#FF6B00'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'var(--gray-200)'
+                    e.currentTarget.style.color = 'var(--gray-700)'
+                  }}
+                >{q}</button>
+              ))}
+            </div>
+          )
+        }
 
         {/* Input */}
         <div style={{
-          display:'flex',gap:10,padding:'12px 0 16px',
-          background:'var(--off-white)'
+          display: 'flex', gap: 10, padding: '12px 0 16px',
+          background: 'var(--off-white)', marginBottom: 'env(safe-area-inset-bottom, 0px)'
         }}>
           <div style={{
-            flex:1,display:'flex',alignItems:'center',gap:10,
-            background:'white',borderRadius:14,
-            border:'1.5px solid var(--gray-200)',
-            padding:'10px 16px',
-            boxShadow:'0 2px 8px rgba(0,0,0,0.06)',
-            transition:'border-color 0.2s',
+            flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+            background: 'white', borderRadius: 14,
+            border: '1.5px solid var(--gray-200)',
+            padding: '10px 16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            transition: 'border-color 0.2s',
           }}
-            onFocusCapture={e=>e.currentTarget.style.borderColor='#FF6B00'}
-            onBlurCapture={e=>e.currentTarget.style.borderColor='var(--gray-200)'}
+            onFocusCapture={e => e.currentTarget.style.borderColor = '#FF6B00'}
+            onBlurCapture={e => e.currentTarget.style.borderColor = 'var(--gray-200)'}
           >
             <input
               ref={inputRef}
@@ -301,8 +306,8 @@ export default function ChatPage() {
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
               placeholder="Ask about colleges, fees, cutoffs, admissions... (Type in English or हिंदी)"
               style={{
-                flex:1,border:'none',outline:'none',
-                fontSize:14,color:'var(--gray-800)',background:'transparent'
+                flex: 1, border: 'none', outline: 'none',
+                fontSize: 16, color: 'var(--gray-800)', background: 'transparent'
               }}
             />
           </div>
@@ -310,27 +315,27 @@ export default function ChatPage() {
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
             style={{
-              width:48,height:48,borderRadius:14,flexShrink:0,
+              width: 48, height: 48, borderRadius: 14, flexShrink: 0,
               background: (input.trim() && !loading) ? 'linear-gradient(135deg,#FF6B00,#FF8C33)' : 'var(--gray-200)',
               color: (input.trim() && !loading) ? 'white' : 'var(--gray-400)',
-              display:'flex',alignItems:'center',justifyContent:'center',
-              transition:'var(--transition)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'var(--transition)',
               boxShadow: (input.trim() && !loading) ? '0 2px 8px rgba(255,107,0,0.3)' : 'none'
             }}
           >
             <Send size={18} />
           </button>
         </div>
-      </div>
+      </div >
 
       {/* Footer */}
-      <div style={{
-        textAlign:'center',fontSize:11,color:'var(--gray-400)',
-        padding:'8px',background:'white',
-        borderTop:'1px solid var(--gray-100)'
+      < div style={{
+        textAlign: 'center', fontSize: 11, color: 'var(--gray-400)',
+        padding: '8px', background: 'white',
+        borderTop: '1px solid var(--gray-100)'
       }}>
         Department of Technical Education, Government of Rajasthan · Edubot AI Assistant
-      </div>
+      </div >
 
       <style>{`
         @keyframes typingDot {
@@ -345,6 +350,6 @@ export default function ChatPage() {
           to { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+    </div >
   )
 }

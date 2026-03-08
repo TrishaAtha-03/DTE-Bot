@@ -41,6 +41,8 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -49,6 +51,8 @@ body {
   color: var(--gray-800);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Scrollbar */
@@ -95,3 +99,31 @@ a { color: inherit; text-decoration: none; }
 /* Utility classes */
 .fade-in { animation: fadeIn 0.4s ease forwards; }
 .slide-in { animation: slideInRight 0.3s ease forwards; }
+
+/* Responsive Utilities & Layout Helpers */
+@media screen and (max-width: 768px) {
+  .hide-on-mobile { display: none !important; }
+  .p-responsive { padding: 16px !important; }
+  
+  /* Mobile drawer sidebar helper */
+  .sidebar-responsive {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100 !important;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .hide-on-desktop { display: none !important; }
+}
+
+/* Chat-specific responsiveness */
+@media screen and (max-width: 600px) {
+  .message-bubble-container { max-width: 90% !important; }
+}
+
+@media screen and (min-width: 601px) {
+  .message-bubble-container { max-width: 75% !important; }
+}

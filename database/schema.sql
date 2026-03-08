@@ -2,7 +2,7 @@
 -- AI-Powered Student Assistance Chatbot
 -- Department of Technical Education, Government of Rajasthan
 -- Database Schema with Safety Policies
--- ============================================================
+-- ========username====================================================
 
 SET sql_mode = '';
 SET FOREIGN_KEY_CHECKS = 0;
@@ -62,8 +62,8 @@ CREATE TABLE Course (
     college_id BIGINT NOT NULL,
     name VARCHAR(100),
     branch VARCHAR(255),
-    duration_years INT,
-    intake_capacity INT,
+    duration_years INT CHECK (duration_years >= 0),
+    intake_capacity INT CHECK (intake_capacity >= 0),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (college_id) REFERENCES College(id) ON DELETE CASCADE
@@ -72,8 +72,8 @@ CREATE TABLE Course (
 CREATE TABLE Hostel (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     college_id BIGINT NOT NULL,
-    total_rooms INT,
-    capacity INT,
+    total_rooms INT CHECK (total_rooms >= 0),
+    capacity INT CHECK (capacity >= 0),
     is_available BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -83,9 +83,9 @@ CREATE TABLE Hostel (
 CREATE TABLE Fees (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     course_id BIGINT NOT NULL,
-    tuition_fee INT,
-    hostel_fee INT,
-    other_fee INT,
+    tuition_fee INT CHECK (tuition_fee >= 0),
+    hostel_fee INT CHECK (hostel_fee >= 0),
+    other_fee INT CHECK (other_fee >= 0),
     currency VARCHAR(5) DEFAULT 'INR',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -143,6 +143,7 @@ CREATE INDEX idx_fees_course ON Fees(course_id);
 CREATE INDEX idx_cutoff_course ON Cutoff(course_id);
 CREATE INDEX idx_admission_course ON AdmissionSchedule(course_id);
 CREATE INDEX idx_chat_session ON ChatMessage(session_id);
+CREATE INDEX idx_user_reset_token ON UserAccount(reset_token);
 
 -- ============================================================
 -- VIEWS (Safety Policies - Public Read Only)
@@ -210,7 +211,7 @@ WHERE c.is_active = true;
 -- DATABASE USER & PRIVILEGES (Safety Policies)
 -- ============================================================
 
-CREATE USER IF NOT EXISTS 'dte_app'@'localhost' IDENTIFIED BY 'dte_secure_app_pass_2024!';
+CREATE USER IF NOT EXISTS 'dte_app'@'localhost' IDENTIFIED BY 'dte_secure_app_pass_2024!'; -- Consider using an environment variable or secure vault for production 
 
 GRANT SELECT ON dte_rajasthan.vw_public_college_info TO 'dte_app'@'localhost';
 GRANT SELECT ON dte_rajasthan.vw_public_course_fees TO 'dte_app'@'localhost';

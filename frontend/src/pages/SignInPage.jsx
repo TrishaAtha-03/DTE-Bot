@@ -40,7 +40,7 @@ export default function SignInPage() {
           label="Username"
           placeholder="Enter your username"
           value={form.username}
-          onChange={e => setForm({...form, username: e.target.value})}
+          onChange={e => setForm({ ...form, username: e.target.value })}
           error={errors.username}
         />
         <FormInput
@@ -48,14 +48,14 @@ export default function SignInPage() {
           type="password"
           placeholder="Enter your password"
           value={form.password}
-          onChange={e => setForm({...form, password: e.target.value})}
+          onChange={e => setForm({ ...form, password: e.target.value })}
           error={errors.password}
         />
 
-        <div style={{ textAlign:'right', marginBottom:20, marginTop:-8 }}>
+        <div style={{ textAlign: 'right', marginBottom: 20, marginTop: -8 }}>
           <Link to="/admin/forgot-password" style={{
-            fontSize:13, color:'var(--saffron)', fontWeight:500,
-            textDecoration:'underline'
+            fontSize: 13, color: 'var(--saffron)', fontWeight: 500,
+            textDecoration: 'underline'
           }}>
             Forgot password?
           </Link>
@@ -63,9 +63,9 @@ export default function SignInPage() {
 
         <SubmitButton loading={loading}>Sign In to Dashboard</SubmitButton>
 
-        <p style={{ textAlign:'center', marginTop:16, fontSize:13, color:'var(--gray-500)' }}>
+        <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--gray-500)' }}>
           Don't have an account?{' '}
-          <Link to="/admin/signup" style={{ color:'var(--saffron)', fontWeight:600 }}>
+          <Link to="/admin/signup" style={{ color: 'var(--saffron)', fontWeight: 600 }}>
             Sign Up
           </Link>
         </p>

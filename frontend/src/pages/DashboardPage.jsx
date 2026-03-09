@@ -56,15 +56,10 @@ const S = {
 
 // ─── SMALL HELPERS ────────────────────────────────────────────────────────────
 
-function SectionHeader({ title, onAdd, addLabel = 'Add New' }) {
+function SectionHeader({ title }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
       <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-800)' }}>{title}</h3>
-      {onAdd && (
-        <button onClick={onAdd} style={S.btn('primary')}>
-          <Plus size={14} /> {addLabel}
-        </button>
-      )}
     </div>
   )
 }
@@ -232,8 +227,8 @@ function CoursesSection() {
 
   return (
     <div style={S.card}>
-      <SectionHeader title="Courses & Branches" onAdd={openAdd} addLabel="Add Course" />
-      <div style={{ overflowX: 'auto' }}>
+      <SectionHeader title="Courses & Branches" />
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={S.table}>
           <thead>
             <tr>
@@ -277,45 +272,55 @@ function CoursesSection() {
         </table>
       </div>
 
-      {showModal && (
-        <Modal title={editItem ? 'Edit Course' : 'Add Course'} onClose={() => setShowModal(false)}>
-          <FormRow label="Course Name (e.g. B.Tech, Diploma)">
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={S.input()} placeholder="B.Tech" />
-          </FormRow>
-          <FormRow label="Branch">
-            <input value={form.branch} onChange={e => setForm({ ...form, branch: e.target.value })} style={S.input()} placeholder="Computer Science & Engineering" />
-          </FormRow>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <FormRow label="Duration (years)">
-              <input type="number" value={form.duration_years} onChange={e => setForm({ ...form, duration_years: e.target.value })} style={S.input()} min={1} max={6} />
-            </FormRow>
-            <FormRow label="Intake Capacity">
-              <input type="number" value={form.intake_capacity} onChange={e => setForm({ ...form, intake_capacity: e.target.value })} style={S.input()} />
-            </FormRow>
-          </div>
-          <button style={{ ...S.btn('primary'), width: '100%', justifyContent: 'center' }} onClick={save}>
-            <Save size={14} /> {editItem ? 'Save Changes' : 'Add Course'}
-          </button>
-        </Modal>
-      )}
+      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+        <button style={S.btn('primary')} onClick={openAdd}>
+          <Plus size={14} /> Add Course
+        </button>
+      </div>
 
-      {showFeeModal && (
-        <Modal title="Set Fee Structure" onClose={() => setShowFeeModal(false)}>
-          <FormRow label="Tuition Fee (₹/year)">
-            <input type="number" value={feeForm.tuition_fee} onChange={e => setFeeForm({ ...feeForm, tuition_fee: e.target.value })} style={S.input()} />
-          </FormRow>
-          <FormRow label="Hostel Fee (₹/year, if applicable)">
-            <input type="number" value={feeForm.hostel_fee} onChange={e => setFeeForm({ ...feeForm, hostel_fee: e.target.value })} style={S.input()} />
-          </FormRow>
-          <FormRow label="Other Fees (₹/year)">
-            <input type="number" value={feeForm.other_fee} onChange={e => setFeeForm({ ...feeForm, other_fee: e.target.value })} style={S.input()} />
-          </FormRow>
-          <button style={{ ...S.btn('primary'), width: '100%', justifyContent: 'center' }} onClick={saveFee}>
-            <Save size={14} /> Save Fee Structure
-          </button>
-        </Modal>
-      )}
-    </div>
+      {
+        showModal && (
+          <Modal title={editItem ? 'Edit Course' : 'Add Course'} onClose={() => setShowModal(false)}>
+            <FormRow label="Course Name (e.g. B.Tech, Diploma)">
+              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={S.input()} placeholder="B.Tech" />
+            </FormRow>
+            <FormRow label="Branch">
+              <input value={form.branch} onChange={e => setForm({ ...form, branch: e.target.value })} style={S.input()} placeholder="Computer Science & Engineering" />
+            </FormRow>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+              <FormRow label="Duration (years)">
+                <input type="number" value={form.duration_years} onChange={e => setForm({ ...form, duration_years: e.target.value })} style={S.input()} min={1} max={6} />
+              </FormRow>
+              <FormRow label="Intake Capacity">
+                <input type="number" value={form.intake_capacity} onChange={e => setForm({ ...form, intake_capacity: e.target.value })} style={S.input()} />
+              </FormRow>
+            </div>
+            <button style={{ ...S.btn('primary'), width: '100%', justifyContent: 'center' }} onClick={save}>
+              <Save size={14} /> {editItem ? 'Save Changes' : 'Add Course'}
+            </button>
+          </Modal>
+        )
+      }
+
+      {
+        showFeeModal && (
+          <Modal title="Set Fee Structure" onClose={() => setShowFeeModal(false)}>
+            <FormRow label="Tuition Fee (₹/year)">
+              <input type="number" value={feeForm.tuition_fee} onChange={e => setFeeForm({ ...feeForm, tuition_fee: e.target.value })} style={S.input()} />
+            </FormRow>
+            <FormRow label="Hostel Fee (₹/year, if applicable)">
+              <input type="number" value={feeForm.hostel_fee} onChange={e => setFeeForm({ ...feeForm, hostel_fee: e.target.value })} style={S.input()} />
+            </FormRow>
+            <FormRow label="Other Fees (₹/year)">
+              <input type="number" value={feeForm.other_fee} onChange={e => setFeeForm({ ...feeForm, other_fee: e.target.value })} style={S.input()} />
+            </FormRow>
+            <button style={{ ...S.btn('primary'), width: '100%', justifyContent: 'center' }} onClick={saveFee}>
+              <Save size={14} /> Save Fee Structure
+            </button>
+          </Modal>
+        )
+      }
+    </div >
   )
 }
 
@@ -423,37 +428,45 @@ function AdmissionsSection() {
 
   return (
     <div style={S.card}>
-      <SectionHeader title="Admission Schedules" onAdd={openAdd} addLabel="Add Schedule" />
-      <table style={S.table}>
-        <thead>
-          <tr>{['Course', 'Branch', 'Academic Year', 'Period', 'Link', 'Actions'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
-        </thead>
-        <tbody>
-          {items.length === 0 && (
-            <tr><td colSpan={6} style={{ ...S.td, textAlign: 'center', color: 'var(--gray-400)', padding: 24 }}>No admission schedules added yet.</td></tr>
-          )}
-          {items.map(item => (
-            <tr key={item.id}>
-              <td style={S.td}><strong>{item.course_name}</strong></td>
-              <td style={S.td}>{item.branch}</td>
-              <td style={S.td}>{item.academic_year}</td>
-              <td style={S.td}>{item.start_date} → {item.end_date}</td>
-              <td style={S.td}>
-                {item.admission_link ? (
-                  <a href={item.admission_link} target="_blank" rel="noopener noreferrer"
-                    style={{ color: 'var(--saffron)', fontSize: 12, textDecoration: 'underline' }}>Link</a>
-                ) : '—'}
-              </td>
-              <td style={S.td}>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button style={{ ...S.btn('secondary'), padding: '5px 10px' }} onClick={() => openEdit(item)}><Pencil size={12} /></button>
-                  <button style={{ ...S.btn('danger'), padding: '5px 10px' }} onClick={() => del(item.id)}><Trash2 size={12} /></button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <SectionHeader title="Admission Schedules" />
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={S.table}>
+          <thead>
+            <tr>{['Course', 'Branch', 'Academic Year', 'Period', 'Link', 'Actions'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {items.length === 0 && (
+              <tr><td colSpan={6} style={{ ...S.td, textAlign: 'center', color: 'var(--gray-400)', padding: 24 }}>No admission schedules added yet.</td></tr>
+            )}
+            {items.map(item => (
+              <tr key={item.id}>
+                <td style={S.td}><strong>{item.course_name}</strong></td>
+                <td style={S.td}>{item.branch}</td>
+                <td style={S.td}>{item.academic_year}</td>
+                <td style={S.td}>{item.start_date} → {item.end_date}</td>
+                <td style={S.td}>
+                  {item.admission_link ? (
+                    <a href={item.admission_link} target="_blank" rel="noopener noreferrer"
+                      style={{ color: 'var(--saffron)', fontSize: 12, textDecoration: 'underline' }}>Link</a>
+                  ) : '—'}
+                </td>
+                <td style={S.td}>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button style={{ ...S.btn('secondary'), padding: '5px 10px' }} onClick={() => openEdit(item)}><Pencil size={12} /></button>
+                    <button style={{ ...S.btn('danger'), padding: '5px 10px' }} onClick={() => del(item.id)}><Trash2 size={12} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+        <button style={S.btn('primary')} onClick={openAdd}>
+          <Plus size={14} /> Add Schedule
+        </button>
+      </div>
 
       {showModal && (
         <Modal title={editItem ? 'Edit Admission Schedule' : 'Add Admission Schedule'} onClose={() => setShowModal(false)}>
@@ -466,7 +479,7 @@ function AdmissionsSection() {
           <FormRow label="Academic Year">
             <input value={form.academic_year} onChange={e => setForm({ ...form, academic_year: e.target.value })} style={S.input()} placeholder="2024-2025" />
           </FormRow>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
             <FormRow label="Start Date">
               <input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} style={S.input()} />
             </FormRow>
@@ -523,39 +536,47 @@ function CutoffsSection() {
 
   return (
     <div style={S.card}>
-      <SectionHeader title="Previous Year Cutoff Ranks" onAdd={openAdd} addLabel="Add Cutoff" />
-      <table style={S.table}>
-        <thead>
-          <tr>{['Course', 'Branch', 'Year', 'Category', 'Opening Rank', 'Closing Rank', 'Actions'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
-        </thead>
-        <tbody>
-          {items.length === 0 && (
-            <tr><td colSpan={7} style={{ ...S.td, textAlign: 'center', color: 'var(--gray-400)', padding: 24 }}>No cutoff data added yet.</td></tr>
-          )}
-          {items.map(item => (
-            <tr key={item.id}>
-              <td style={S.td}><strong>{item.course_name}</strong></td>
-              <td style={S.td}>{item.branch}</td>
-              <td style={S.td}>{item.academic_year}</td>
-              <td style={S.td}>
-                <span style={{
-                  padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
-                  background: `${catColors[item.category] || '#6B7280'}22`,
-                  color: catColors[item.category] || '#6B7280'
-                }}>{item.category}</span>
-              </td>
-              <td style={S.td}>{item.opening_rank}</td>
-              <td style={S.td}>{item.closing_rank}</td>
-              <td style={S.td}>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button style={{ ...S.btn('secondary'), padding: '5px 10px' }} onClick={() => openEdit(item)}><Pencil size={12} /></button>
-                  <button style={{ ...S.btn('danger'), padding: '5px 10px' }} onClick={() => del(item.id)}><Trash2 size={12} /></button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <SectionHeader title="Previous Year Cutoff Ranks" />
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={S.table}>
+          <thead>
+            <tr>{['Course', 'Branch', 'Year', 'Category', 'Opening Rank', 'Closing Rank', 'Actions'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {items.length === 0 && (
+              <tr><td colSpan={7} style={{ ...S.td, textAlign: 'center', color: 'var(--gray-400)', padding: 24 }}>No cutoff data added yet.</td></tr>
+            )}
+            {items.map(item => (
+              <tr key={item.id}>
+                <td style={S.td}><strong>{item.course_name}</strong></td>
+                <td style={S.td}>{item.branch}</td>
+                <td style={S.td}>{item.academic_year}</td>
+                <td style={S.td}>
+                  <span style={{
+                    padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
+                    background: `${catColors[item.category] || '#6B7280'}22`,
+                    color: catColors[item.category] || '#6B7280'
+                  }}>{item.category}</span>
+                </td>
+                <td style={S.td}>{item.opening_rank}</td>
+                <td style={S.td}>{item.closing_rank}</td>
+                <td style={S.td}>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button style={{ ...S.btn('secondary'), padding: '5px 10px' }} onClick={() => openEdit(item)}><Pencil size={12} /></button>
+                    <button style={{ ...S.btn('danger'), padding: '5px 10px' }} onClick={() => del(item.id)}><Trash2 size={12} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+        <button style={S.btn('primary')} onClick={openAdd}>
+          <Plus size={14} /> Add Cutoff
+        </button>
+      </div>
 
       {showModal && (
         <Modal title={editItem ? 'Edit Cutoff' : 'Add Cutoff'} onClose={() => setShowModal(false)}>
@@ -565,7 +586,7 @@ function CutoffsSection() {
               {courses.map(c => <option key={c.id} value={c.id}>{c.name} - {c.branch}</option>)}
             </select>
           </FormRow>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
             <FormRow label="Academic Year">
               <input value={form.academic_year} onChange={e => setForm({ ...form, academic_year: e.target.value })} style={S.input()} placeholder="2023-2024" />
             </FormRow>

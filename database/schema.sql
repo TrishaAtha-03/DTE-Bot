@@ -47,6 +47,7 @@ CREATE TABLE UserAccount (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
     role VARCHAR(20) DEFAULT 'ADMIN',
     college_id BIGINT NULL,
     is_active BOOLEAN DEFAULT true,

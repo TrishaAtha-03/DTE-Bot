@@ -45,14 +45,14 @@ def send_reset_email(to_email: str, token: str):
 
 You requested a password reset for your DTE Rajasthan Admin account.
 
-Click here to reset your password: {reset_link}
+Your OTP for password reset is: {token}
 
-This link expires in 1 hour. If you did not request this, ignore this email.
+This OTP is valid for 1 hour. If you did not request this, ignore this email.
 
 DTE Rajasthan Team
 """
     msg = MIMEText(body)
-    msg['Subject'] = 'DTE Rajasthan - Password Reset Request'
+    msg['Subject'] = 'DTE Rajasthan - Password Reset OTP'
     msg['From'] = os.getenv("SMTP_FROM")
     msg['To'] = to_email
 
@@ -82,9 +82,10 @@ def signup():
     data = request.json
     username = data.get("username", "").strip()
     password = data.get("password", "").strip()
+    email = data.get("email", "").strip()
     college_code = data.get("college_code", "").strip().upper()
 
-    if not username or not password or not college_code:
+    if not username or not password or not college_code or not email:
         return jsonify({"error": "All fields are required"}), 400
 
     if len(password) < 8:
@@ -107,8 +108,8 @@ def signup():
 
     hashed = hash_password(password)
     execute_one(
-        "INSERT INTO UserAccount (username, password, role, college_id) VALUES (%s, %s, 'ADMIN', %s)",
-        (username, hashed, college['id']),
+        "INSERT INTO UserAccount (username, password, email, role, college_id) VALUES (%s, %s, %s, 'ADMIN', %s)",
+        (username, hashed, email, college['id']),
         commit=True
     )
 
@@ -151,57 +152,61 @@ def signin():
 
 @app.route("/api/auth/forgot-password", methods=["POST"])
 def forgot_password():
-    """Generate reset token and send email."""
+    """Generate reset OTP and send email."""
     data = request.json
-    username = data.get("username", "").strip()
+    email = data.get("email", "").strip()
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
 
     user = execute_one(
-        "SELECT u.*, c.email as college_email FROM UserAccount u "
-        "LEFT JOIN College c ON u.college_id = c.id WHERE u.username = %s AND u.is_active = 1",
-        (username,)
+        "SELECT id, email FROM UserAccount WHERE email = %s AND is_active = 1",
+        (email,)
     )
     # Always return success to prevent user enumeration
     if user:
-        token = secrets.token_urlsafe(32)
+        # Generate 6-digit OTP
+        import random
+        otp = str(random.randint(100000, 999999))
         expires = datetime.utcnow() + timedelta(hours=1)
-        # Hash the reset token before storing it
+        # Hash the OTP before storing it
         import hashlib
-        hashed_token = hashlib.sha256(token.encode()).hexdigest()
+        hashed_otp = hashlib.sha256(otp.encode()).hexdigest()
         
         execute_one(
             "UPDATE UserAccount SET reset_token = %s, reset_token_expires = %s WHERE id = %s",
-            (hashed_token, expires, user['id']),
+            (hashed_otp, expires, user['id']),
             commit=True
         )
-        # Send email to college email
-        if user.get('college_email'):
-            send_reset_email_async(user['college_email'], token)
+        # Send OTP to the user's registered email
+        send_reset_email_async(user['email'], otp)
 
-    return jsonify({"message": "If the account exists, a reset link has been sent to the registered college email."}), 200
+    return jsonify({"message": "If the account exists, an OTP has been sent to the registered email address."}), 200
 
 
 @app.route("/api/auth/reset-password", methods=["POST"])
 def reset_password():
-    """Reset password via token."""
+    """Reset password via OTP."""
     data = request.json
-    token = data.get("token", "").strip()
+    email = data.get("email", "").strip()
+    otp = data.get("token", "").strip()
     new_password = data.get("password", "").strip()
 
-    if not token or not new_password:
-        return jsonify({"error": "Token and new password are required"}), 400
+    if not email or not otp or not new_password:
+        return jsonify({"error": "Email, OTP and new password are required"}), 400
 
     if len(new_password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
 
     import hashlib
-    hashed_token = hashlib.sha256(token.encode()).hexdigest()
+    hashed_otp = hashlib.sha256(otp.encode()).hexdigest()
 
     user = execute_one(
-        "SELECT * FROM UserAccount WHERE reset_token = %s AND reset_token_expires > %s",
-        (hashed_token, datetime.utcnow())
+        "SELECT id FROM UserAccount WHERE email = %s AND reset_token = %s AND reset_token_expires > %s",
+        (email, hashed_otp, datetime.utcnow())
     )
     if not user:
-        return jsonify({"error": "Invalid or expired reset token"}), 400
+        return jsonify({"error": "Invalid or expired OTP, or incorrect email"}), 400
 
     hashed = hash_password(new_password)
     execute_one(

@@ -178,8 +178,11 @@ def forgot_password():
             (hashed_otp, expires, user['id']),
             commit=True
         )
-        # Send OTP to the user's registered email
-        send_reset_email_async(user['email'], otp)
+        # Send OTP to the user's registered email synchronously so we catch the error
+        try:
+            send_reset_email(user['email'], otp)
+        except Exception as e:
+            return jsonify({"error": f"Failed to send email: {str(e)}"}), 500
 
     return jsonify({"message": "If the account exists, an OTP has been sent to the registered email address."}), 200
 

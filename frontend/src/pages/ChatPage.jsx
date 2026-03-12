@@ -115,10 +115,12 @@ export default function ChatPage() {
       const res = await api.post('/chat', { message: msg, session_id: sessionId })
       setSessionId(res.data.session_id)
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.response }])
-    } catch {
+    } catch (error) {
+      console.error("Chat API Error:", error)
+      const errorMsg = error.response?.data?.error || error.message || 'Unknown error occurred'
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.'
+        content: `Sorry, I encountered an error connecting to the server. (${errorMsg}). Please try again.`
       }])
     } finally {
       setLoading(false)

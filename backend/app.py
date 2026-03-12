@@ -57,10 +57,20 @@ DTE Rajasthan Team
     msg['To'] = to_email
 
     try:
-        with smtplib.SMTP(os.getenv("SMTP_HOST"), int(os.getenv("SMTP_PORT", 587))) as s:
-            s.starttls()
-            s.login(os.getenv("SMTP_USER"), os.getenv("SMTP_PASSWORD"))
-            s.sendmail(msg['From'], [to_email], msg.as_string())
+        port = int(os.getenv("SMTP_PORT", 587))
+        host = os.getenv("SMTP_HOST")
+        user = os.getenv("SMTP_USER")
+        pwd = os.getenv("SMTP_PASSWORD")
+        
+        if port == 465:
+            with smtplib.SMTP_SSL(host, port, timeout=10) as s:
+                s.login(user, pwd)
+                s.sendmail(msg['From'], [to_email], msg.as_string())
+        else:
+            with smtplib.SMTP(host, port, timeout=10) as s:
+                s.starttls()
+                s.login(user, pwd)
+                s.sendmail(msg['From'], [to_email], msg.as_string())
     except Exception as e:
         print(f"Email error: {e}")
 
